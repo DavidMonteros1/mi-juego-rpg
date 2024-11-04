@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Pokémon ASCII</title>
+    <style>
+        /* Estilo retro Game Boy */
+        body {
+            background-color: #f2f2a6;
+            color: #3b3b28;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: monospace;
+        }
+        #game-container {
+            border: 5px solid #3b3b28;
+            padding: 10px;
+            margin: 20px 0;
+            background-color: #a0a076;
+            text-align: center;
+            width: 220px;
+        }
+        #map {
+            white-space: pre;
+            line-height: 1.2;
+        }
+        #status {
+            margin-top: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pokémon ASCII</h1>
+    <div id="game-container">
+        <div id="map"></div>
+        <div id="status">Pokébolas: 0</div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
