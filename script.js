@@ -2,18 +2,18 @@ let map = [];
 let player = { x: 3, y: 2, hp: 100, hunger: 0, level: 1, exp: 0, gold: 0, direction: 'right' };
 let enemies = [];
 let currentMap = 1;
-const viewportWidth = 40;
-const viewportHeight = 20;
+const viewportWidth = 30;
+const viewportHeight = 15;
 
 function createEnemy(x, y, level) {
-    return { x, y, hp: 10 * level, attack: 2 * level, defense: 1 * level, level };
+    return { x, y, hp: 10 * level, attack: 2 * level, defense: 1 * level, level, lastMove: Date.now() };
 }
 
 function randomPosition() {
     let x, y;
     do {
-        x = Math.floor(Math.random() * viewportWidth);
-        y = Math.floor(Math.random() * viewportHeight);
+        x = Math.floor(Math.random() * map[0].length);
+        y = Math.floor(Math.random() * map.length);
     } while (map[y][x] !== '.');
     return { x, y };
 }
@@ -90,7 +90,6 @@ function move(direction) {
 
     renderMap();
 }
-
 function loadSpecificMap(x, y) {
     if (currentMap === 1 && x === 16 && y === 20) {
         currentMap = 2;
@@ -128,6 +127,8 @@ function attack() {
                 player.gold += enemy.level * 10;
                 player.exp += enemy.level * 5;
                 enemies = enemies.filter(e => e !== enemy);
+            } else {
+                player.hp -= enemy.attack; // Enemigo ataca de vuelta
             }
         }
     });
@@ -141,6 +142,38 @@ function attack() {
     }, 500); // El ataque dura 0.5 segundos
 }
 
+function enemyMove(enemy) {
+    const directions = ['up', 'down', 'left', 'right'];
+    const direction = directions[Math.floor(Math.random() * directions.length)];
+    const moveVectors = { up: [-1, 0], down: [1, 0], left: [0, -1], right: [1, 0] };
+    const [deltaY, deltaX] = moveVectors[direction];
+    const newX = enemy.x + deltaX;
+    const newY = enemy.y + deltaY;
+
+    if (map[newY] && map[newY][newX] === '.') {
+        enemy.x = newX;
+        enemy.y = newY;
+    }
+
+    // Ataque del enemigo al jugador
+    if (Math.abs(enemy.x - player.x) <= 1 && Math.abs(enemy.y - player.y) <= 1) {
+        player.hp -= enemy.attack;
+        if (player.hp <= 0) {
+            alert('Game Over');
+        }
+    }
+}
+
+function updateEnemies() {
+    enemies.forEach(enemy => {
+        enemyMove(enemy);
+    });
+
+    if (player.hp > 0) {
+        renderMap();
+        setTimeout(updateEnemies, 1000); // Actualiza los enemigos cada 1 segundo
+    }
+}
 function enemySymbol(level) {
     if (level === 1) return 'g';
     if (level === 2) return 'G';
@@ -157,3 +190,4 @@ document.addEventListener('keydown', function(event) {
 });
 
 loadMap(currentMap);
+updateEnemies(); // Inicia el movimiento de enemigos

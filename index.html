@@ -19,8 +19,8 @@
             margin: 20px 0;
             background-color: #a0a076;
             text-align: center;
-            width: 410px;
-            height: 360px;
+            width: 310px; /* Ajustado para contener 30 caracteres */
+            height: 270px; /* Ajustado para contener 15 líneas de altura */
             overflow: hidden;
         }
         #map {
@@ -32,14 +32,21 @@
             margin-top: 10px;
             font-size: 16px;
         }
-        #controls {
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             margin-top: 10px;
         }
-        .button {
+        .control-row {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 5px;
+        }
+        button {
             font-size: 16px;
             padding: 5px 10px;
-            margin: 5px;
-            cursor: pointer;
+            margin: 2px;
         }
     </style>
 </head>
@@ -53,13 +60,20 @@
         Inventario: Oro 0<br>
         Posición: X0 Y0 | Mapa 1
     </div>
-    <div id="controls">
-        <button class="button" onclick="move('up')">↑</button><br>
-        <button class="button" onclick="move('left')">←</button>
-        <button class="button" onclick="move('down')">↓</button>
-        <button class="button" onclick="move('right')">→</button><br>
-        <button class="button" onclick="attack()">Atacar</button>
+    <div class="controls">
+        <div class="control-row">
+            <button onclick="move('up')">↑</button>
+        </div>
+        <div class="control-row">
+            <button onclick="move('left')">←</button>
+            <button onclick="attack()">⎵</button>
+            <button onclick="move('right')">→</button>
+        </div>
+        <div class="control-row">
+            <button onclick="move('down')">↓</button>
+        </div>
     </div>
     <script src="script.js"></script>
 </body>
 </html>
+    
