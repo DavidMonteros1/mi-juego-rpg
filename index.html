@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini Pokémon ASCII</title>
+    <title>RPG ASCII</title>
     <style>
         body {
             background-color: #f2f2a6;
@@ -19,26 +19,46 @@
             margin: 20px 0;
             background-color: #a0a076;
             text-align: center;
-            width: 410px; /* Ajustado para contener 40 caracteres */
-            height: 360px; /* Ajustado para contener 20 líneas de altura */
-            overflow: hidden; /* Oculta cualquier contenido fuera de la "pantalla" */
+            width: 410px;
+            height: 360px;
+            overflow: hidden;
         }
         #map {
             white-space: pre;
             line-height: 1.2;
-            font-size: 14px; /* Ajustar tamaño según preferencia */
+            font-size: 14px;
         }
-        #status {
+        #info {
             margin-top: 10px;
             font-size: 16px;
+        }
+        #controls {
+            margin-top: 10px;
+        }
+        .button {
+            font-size: 16px;
+            padding: 5px 10px;
+            margin: 5px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <h1>Pokémon ASCII</h1>
+    <h1>RPG ASCII</h1>
     <div id="game-container">
         <div id="map"></div>
-        <div id="status">Pokébolas: 0</div>
+    </div>
+    <div id="info">
+        Estado: Vida 100 | Hambre 0 | Nivel 1 | Exp 0<br>
+        Inventario: Oro 0<br>
+        Posición: X0 Y0 | Mapa 1
+    </div>
+    <div id="controls">
+        <button class="button" onclick="move('up')">↑</button><br>
+        <button class="button" onclick="move('left')">←</button>
+        <button class="button" onclick="move('down')">↓</button>
+        <button class="button" onclick="move('right')">→</button><br>
+        <button class="button" onclick="attack()">Atacar</button>
     </div>
     <script src="script.js"></script>
 </body>
