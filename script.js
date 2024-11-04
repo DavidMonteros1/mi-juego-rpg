@@ -1,9 +1,8 @@
-let map = [];       // Contenido del mapa actual
-let player = { x: 3, y: 2 }; // Posición inicial
-let pokeBalls = 0;  // Contador de Pokébolas
+let map = []; // Contenido del mapa actual
+let player = { x: 3, y: 2 }; // Posición inicial del jugador
+let pokeBalls = 0; // Contador de Pokébolas
 let currentMap = 1; // Número del mapa actual
-const viewportWidth = 40;
-const viewportHeight = 20;
+const viewport = { width: 40, height: 20 }; // Tamaño de la "ventana" de visualización
 
 async function loadMap(mapNumber) {
     try {
@@ -13,8 +12,6 @@ async function loadMap(mapNumber) {
         }
         const text = await response.text();
         map = text.trim().split('\n');
-        pokeBalls = 0;
-        player = { x: 3, y: 2 }; // Reinicia la posición del jugador
         renderMap();
     } catch (error) {
         alert(error.message);
@@ -22,23 +19,24 @@ async function loadMap(mapNumber) {
 }
 
 function renderMap() {
-    const startX = Math.max(0, player.x - Math.floor(viewportWidth / 2));
-    const startY = Math.max(0, player.y - Math.floor(viewportHeight / 2));
-    const endX = Math.min(startX + viewportWidth, map[0].length);
-    const endY = Math.min(startY + viewportHeight, map.length);
+    // Determinar los límites de la ventana de visualización alrededor del jugador
+    const startX = Math.max(0, player.x - Math.floor(viewport.width / 2));
+    const startY = Math.max(0, player.y - Math.floor(viewport.height / 2));
+    const endX = Math.min(map[0].length, startX + viewport.width);
+    const endY = Math.min(map.length, startY + viewport.height);
 
+    // Renderizar solo el área visible del mapa
     let renderedMap = '';
     for (let y = startY; y < endY; y++) {
-        let row = map[y];
+        let row = map[y].substring(startX, endX);
         if (y === player.y) {
-            row = row.substring(0, player.x) + '@' + row.substring(player.x + 1);
+            row = row.substring(0, player.x - startX) + '@' + row.substring(player.x - startX + 1);
         }
-        renderedMap += row.slice(startX, endX) + '\n';
+        renderedMap += row + '\n';
     }
 
     document.getElementById('map').textContent = renderedMap;
-    document.getElementById('status').textContent = "Pokébolas: " + pokeBalls;
-    document.getElementById('position').textContent = `Posición: X${player.x} Y${player.y}`;
+    document.getElementById('status').textContent = `Pokébolas: ${pokeBalls} | Posición: X${player.x} Y${player.y}`;
 }
 
 function move(direction) {
@@ -50,46 +48,32 @@ function move(direction) {
     if (direction === 'left') newX--;
     if (direction === 'right') newX++;
 
-    // Verificar límites del mapa y si es una pared
     if (map[newY] && (map[newY][newX] === '.' || map[newY][newX] === 'o' || map[newY][newX] === 'M')) {
-        // Verificar si el jugador ha encontrado una Pokébola
         if (map[newY][newX] === 'o') {
             pokeBalls++;
             map[newY] = map[newY].substring(0, newX) + '.' + map[newY].substring(newX + 1);
         }
 
-        // Verificar si el jugador ha encontrado un mapa
         if (map[newY][newX] === 'M') {
             loadSpecificMap(newX, newY);
-            return; // Salir de la función para evitar mover al jugador
+            return;
         }
 
         player.x = newX;
         player.y = newY;
     }
 
-    // Si el jugador llega a los límites, carga el siguiente mapa
-    if (newY === map.length - 1 && direction === 'down') {
-        loadNextMap();
-    }
-
     renderMap();
 }
 
 function loadSpecificMap(x, y) {
-    // Cargar un mapa específico basado en la posición del carácter 'M'
     if (x === 16 && y === 20) {
-        currentMap = 2; // Por ejemplo, asignar el mapa 2
+        currentMap = 2;
     } else {
-        return; // Salir si no hay un mapa asignado
+        return;
     }
 
     loadMap(currentMap);
-}
-
-async function loadNextMap() {
-    currentMap++;
-    await loadMap(currentMap);
 }
 
 // Control del teclado
