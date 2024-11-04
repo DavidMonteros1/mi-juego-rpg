@@ -4,12 +4,19 @@ let pokeBalls = 0;  // Contador de Pokébolas
 let currentMap = 1; // Número del mapa actual
 
 async function loadMap(mapNumber) {
-    const response = await fetch(`maps/map${mapNumber}.txt`);
-    const text = await response.text();
-    map = text.trim().split('\n');
-    pokeBalls = 0;
-    player = { x: 3, y: 2 }; // Reinicia la posición del jugador
-    renderMap();
+    try {
+        const response = await fetch(`maps/map${mapNumber}.txt`);
+        if (!response.ok) {
+            throw new Error('Mapa no encontrado');
+        }
+        const text = await response.text();
+        map = text.trim().split('\n');
+        pokeBalls = 0;
+        player = { x: 3, y: 2 }; // Reinicia la posición del jugador
+        renderMap();
+    } catch (error) {
+        alert(error.message);
+    }
 }
 
 function renderMap() {
@@ -34,11 +41,20 @@ function move(direction) {
     if (direction === 'right') newX++;
 
     // Verificar límites del mapa y si es una pared
-    if (map[newY][newX] === '.' || map[newY][newX] === 'o') {
+    if (map[newY] && (map[newY][newX] === '.' || map[newY][newX] === 'o' || map[newY][newX] === 'M')) {
+        // Verificar si el jugador ha encontrado una Pokébola
         if (map[newY][newX] === 'o') {
             pokeBalls++;
             map[newY] = map[newY].substring(0, newX) + '.' + map[newY].substring(newX + 1);
         }
+
+        // Verificar si el jugador ha encontrado un mapa
+        if (map[newY][newX] === 'M') {
+            // Cargar un mapa específico dependiendo de su posición
+            loadSpecificMap(newX, newY);
+            return; // Salir de la función para evitar mover al jugador
+        }
+
         player.x = newX;
         player.y = newY;
     }
@@ -49,6 +65,17 @@ function move(direction) {
     }
 
     renderMap();
+}
+
+function loadSpecificMap(x, y) {
+    // Cargar un mapa específico basado en la posición del carácter 'M'
+    if (x === 16 && y === 20) {
+        currentMap = 2; // Por ejemplo, asignar el mapa 2
+    } else {
+        return; // Salir si no hay un mapa asignado
+    }
+
+    loadMap(currentMap);
 }
 
 async function loadNextMap() {
