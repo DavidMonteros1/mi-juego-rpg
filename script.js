@@ -4,6 +4,7 @@ let enemies = [];
 let currentMap = 1;
 const viewportWidth = 30;
 const viewportHeight = 15;
+const detectionRange = 5;
 
 function createEnemy(x, y, level) {
     return { x, y, hp: 10 * level, attack: 2 * level, defense: 1 * level, level, lastMove: Date.now() };
@@ -34,13 +35,18 @@ async function loadMap(mapNumber) {
             let pos = randomPosition();
             enemies.push(createEnemy(pos.x, pos.y, 2));
         }
+        console.log(`Enemigos en el mapa ${mapNumber}: `, enemies); // Registro de enemigos
         renderMap();
     } catch (error) {
         alert(error.message);
     }
 }
-
 function renderMap() {
+    if (!map || map.length === 0 || !map[0]) {
+        console.log('El mapa no está cargado correctamente.');
+        return;
+    }
+
     const startX = Math.max(0, player.x - Math.floor(viewportWidth / 2));
     const startY = Math.max(0, player.y - Math.floor(viewportHeight / 2));
     const endX = Math.min(startX + viewportWidth, map[0].length);
@@ -64,6 +70,7 @@ function renderMap() {
     document.getElementById('info').innerHTML = `Estado: Vida ${player.hp} | Hambre ${player.hunger} | Nivel ${player.level} | Exp ${player.exp}<br>
         Inventario: Oro ${player.gold}<br>
         Posición: X${player.x} Y${player.y} | Mapa ${currentMap}`;
+    console.log("Mapa renderizado"); // Registro de renderización
 }
 
 let attacking = false;
@@ -89,7 +96,9 @@ function move(direction) {
     }
 
     renderMap();
+    console.log(`Jugador movido a X${player.x} Y${player.y}`); // Registro del movimiento del jugador
 }
+
 function loadSpecificMap(x, y) {
     if (currentMap === 1 && x === 16 && y === 20) {
         currentMap = 2;
@@ -106,7 +115,6 @@ async function loadNextMap() {
     currentMap++;
     await loadMap(currentMap);
 }
-
 function attack() {
     if (attacking) return;
     attacking = true;
@@ -140,11 +148,25 @@ function attack() {
         attacking = false;
         renderMap();
     }, 500); // El ataque dura 0.5 segundos
+    console.log("Ataque realizado"); // Registro de ataque
 }
 
 function enemyMove(enemy) {
     const directions = ['up', 'down', 'left', 'right'];
-    const direction = directions[Math.floor(Math.random() * directions.length)];
+    let direction;
+
+    // Si el jugador está dentro del rango de detección, perseguirlo
+    if (Math.abs(enemy.x - player.x) <= detectionRange && Math.abs(enemy.y - player.y) <= detectionRange) {
+        if (Math.abs(enemy.x - player.x) > Math.abs(enemy.y - player.y)) {
+            direction = enemy.x > player.x ? 'left' : 'right';
+        } else {
+            direction = enemy.y > player.y ? 'up' : 'down';
+        }
+    } else {
+        // Movimiento aleatorio
+        direction = directions[Math.floor(Math.random() * directions.length)];
+    }
+
     const moveVectors = { up: [-1, 0], down: [1, 0], left: [0, -1], right: [1, 0] };
     const [deltaY, deltaX] = moveVectors[direction];
     const newX = enemy.x + deltaX;
@@ -162,8 +184,9 @@ function enemyMove(enemy) {
             alert('Game Over');
         }
     }
-}
 
+    console.log(`Enemigo movido a X${enemy.x} Y${enemy.y}`); // Registro del movimiento del enemigo
+}
 function updateEnemies() {
     enemies.forEach(enemy => {
         enemyMove(enemy);
@@ -172,8 +195,10 @@ function updateEnemies() {
     if (player.hp > 0) {
         renderMap();
         setTimeout(updateEnemies, 1000); // Actualiza los enemigos cada 1 segundo
+        console.log("Enemigos actualizados"); // Registro de actualización de enemigos
     }
 }
+
 function enemySymbol(level) {
     if (level === 1) return 'g';
     if (level === 2) return 'G';
@@ -187,7 +212,9 @@ document.addEventListener('keydown', function(event) {
     if (event.key === 'a' || event.key === 'ArrowLeft') move('left');
     if (event.key === 'd' || event.key === 'ArrowRight') move('right');
     if (event.key === ' ') attack();
+    console.log(`Tecla presionada: ${event.key}`); // Registro de teclas presionadas
 });
 
 loadMap(currentMap);
 updateEnemies(); // Inicia el movimiento de enemigos
+console.log("Juego iniciado"); // Registro de inicio del juego
